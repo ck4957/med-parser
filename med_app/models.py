@@ -1,3 +1,8 @@
+# models.py
 from django.db import models
 
-# Create your models here.
+class MedicationStatement(models.Model):
+    statement_text = models.TextField()
+
+# serializers.py
+# views.py

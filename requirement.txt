@@ -1,5 +1,4 @@
 Django
 django-rest-swagger==2.2.0
-djangorestframework
-med7
 spacy
+medspacy
