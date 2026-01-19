@@ -9,6 +9,8 @@ const MedicalTextParser = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [apiStatus, setApiStatus] = useState(null);
+  const [selectedModel, setSelectedModel] = useState("medspacy");
+  const [modelUsed, setModelUsed] = useState(null);
 
   const handleIndex = async () => {
     try {
@@ -35,13 +37,25 @@ const MedicalTextParser = () => {
       setLoading(true);
       setError(null);
       setApiStatus(null);
-      const response = await axios.post(`${API_URL}/api/parse_medical_text`, {
+
+      // Choose endpoint based on selected model
+      const endpoint =
+        selectedModel === "medgemma"
+          ? `${API_URL}/api/parse_medical_text_gemma`
+          : `${API_URL}/api/parse_medical_text`;
+
+      const response = await axios.post(endpoint, {
         medical_text: text,
       });
       console.log(response.data);
       setEntities(response.data.entities || []);
+      setModelUsed(response.data.model || selectedModel);
     } catch (error) {
-      setError("Error parsing medical text: " + error.message);
+      if (error.response?.data?.message) {
+        setError(error.response.data.message);
+      } else {
+        setError("Error parsing medical text: " + error.message);
+      }
       console.error("Error parsing medical text:", error);
     } finally {
       setLoading(false);
@@ -53,6 +67,7 @@ const MedicalTextParser = () => {
     setEntities([]);
     setError(null);
     setApiStatus(null);
+    setModelUsed(null);
   };
 
   const getEntityColor = (label) => {
@@ -87,6 +102,36 @@ const MedicalTextParser = () => {
 
         {apiStatus && <div className="status-message success">{apiStatus}</div>}
 
+        <div className="model-selector">
+          <label htmlFor="model-select">Select Model:</label>
+          <div className="radio-group">
+            <label className="radio-label">
+              <input
+                type="radio"
+                name="model"
+                value="medspacy"
+                checked={selectedModel === "medspacy"}
+                onChange={(e) => setSelectedModel(e.target.value)}
+                disabled={loading}
+              />
+              <span>medspaCy (Local)</span>
+              <small>Fast, local NLP processing</small>
+            </label>
+            <label className="radio-label">
+              <input
+                type="radio"
+                name="model"
+                value="medgemma"
+                checked={selectedModel === "medgemma"}
+                onChange={(e) => setSelectedModel(e.target.value)}
+                disabled={loading}
+              />
+              <span>MedGemma (Google AI)</span>
+              <small>Advanced AI model, requires API key</small>
+            </label>
+          </div>
+        </div>
+
         <div className="input-section">
           <label htmlFor="medical-text">Enter Medical Text:</label>
           <textarea
@@ -105,7 +150,9 @@ const MedicalTextParser = () => {
             disabled={loading}
             className="btn btn-primary"
           >
-            {loading ? "Parsing..." : "Parse Medical Text"}
+            {loading
+              ? "Parsing..."
+              : `Parse with ${selectedModel === "medgemma" ? "MedGemma" : "medspaCy"}`}
           </button>
           <button
             onClick={handleClear}
@@ -120,7 +167,12 @@ const MedicalTextParser = () => {
 
         {entities.length > 0 && (
           <div className="results-section">
-            <h2>Extracted Entities ({entities.length})</h2>
+            <h2>
+              Extracted Entities ({entities.length})
+              {modelUsed && (
+                <span className="model-badge"> • Parsed with {modelUsed}</span>
+              )}
+            </h2>
             <div className="entities-grid">
               {entities.map((entity, index) => (
                 <div

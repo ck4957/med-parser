@@ -23,19 +23,29 @@ Parse unstructured medication text into structured entities using a Django API a
    pip install -r requirement.txt
    ```
 
-3. Download the spaCy medical model (required):
+3. Download the spaCy medical model (required for medspaCy):
 
    ```bash
    python -m spacy download en_core_web_sm
    ```
 
-4. Run migrations:
+4. (Optional) Set up MedGemma with Google AI:
+
+   To use the MedGemma model, you need a Google API key:
+
+   ```bash
+   export GOOGLE_API_KEY="your-api-key-here"
+   ```
+
+   Get your API key from: https://makersuite.google.com/app/apikey
+
+5. Run migrations:
 
    ```bash
    python manage.py migrate
    ```
 
-5. Start the dev server:
+6. Start the dev server:
    ```bash
    python manage.py runserver
    ```
@@ -45,9 +55,10 @@ The API is served at `http://127.0.0.1:8000/api/`.
 ## API endpoints
 
 - `GET /api/` — health check.
-- `POST /api/parse_medical_text` — extracts entities from medical text.
+- `POST /api/parse_medical_text` — extracts entities using medspaCy (local).
+- `POST /api/parse_medical_text_gemma` — extracts entities using MedGemma (Google AI).
 
-Request body:
+Request body (both endpoints):
 
 ```
 {
@@ -63,7 +74,8 @@ Response example:
      ["Metformin", "DRUG"],
      ["500mg", "DOSAGE"],
      ["twice daily", "FREQUENCY"]
-  ]
+  ],
+  "model": "medspacy"
 }
 ```
 
@@ -94,6 +106,9 @@ The UI runs at `http://localhost:3000` and connects to the Django API.
 
 ## Features
 
+- **Multiple AI Models**: Choose between two parsing engines:
+  - **medspaCy**: Fast, local medical NLP processing (no API key needed)
+  - **MedGemma**: Google's advanced medical AI model (requires API key)
 - **Medical Text Input**: Enter unstructured medical text in a user-friendly interface
 - **Entity Extraction**: Automatically extracts and categorizes medical entities:
   - Drugs/Medications
@@ -110,8 +125,19 @@ The UI runs at `http://localhost:3000` and connects to the Django API.
 
 - CORS is enabled for local development in [med_parser/settings.py](med_parser/settings.py).
 - The Django backend uses medspaCy for medical NLP processing.
+- MedGemma uses Google's Gemini API for advanced medical entity extraction.
 - The frontend is built with React and uses Axios for API calls.
 - All dependencies are listed in [requirement.txt](requirement.txt) (backend) and [med_ui/package.json](med_ui/package.json) (frontend).
+
+## Model Comparison
+
+| Feature  | medspaCy           | MedGemma            |
+| -------- | ------------------ | ------------------- |
+| Speed    | Very Fast          | Moderate (API call) |
+| Setup    | Local install only | Requires API key    |
+| Accuracy | Good               | Excellent           |
+| Cost     | Free               | Free tier available |
+| Privacy  | Fully local        | Cloud-based         |
 
 ## Quick Start
 
@@ -130,4 +156,6 @@ The UI runs at `http://localhost:3000` and connects to the Django API.
 
 3. **Access the app**: Open `http://localhost:3000` in your browser
 
-4. **Test it**: Try parsing "Metformin 500mg twice daily for diabetes"
+4. **Select a model**: Choose medspaCy or MedGemma in the UI
+
+5. **Test it**: Try parsing "Metformin 500mg twice daily for diabetes"
