@@ -1,0 +1,28 @@
+# MLX-based Medical AI Pipeline Requirements
+# Optimized for Apple Silicon (M1/M2/M3/M4)
+
+# Core MLX framework for Apple Silicon inference
+mlx-lm>=0.1.0
+
+# FHIR R4 validation library
+fhir.resources>=7.0.0
+
+# Standard dependencies
+pydantic>=2.0.0
+numpy>=1.24.0
+
+# Vector database for code lookup fallback
+faiss-cpu>=1.7.4
+
+# System monitoring (for pre-flight checks)
+psutil>=5.9.0
+
+# Optional: for enhanced model management
+huggingface-hub>=0.19.0
+
+# Development/Testing
+pytest>=7.4.0
+pytest-cov>=4.1.0
+
+# Note: MLX requires macOS 13.3+ and Apple Silicon (M-series chips)
+# For non-Apple Silicon systems, use alternative requirements file
